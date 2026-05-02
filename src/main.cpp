@@ -6,8 +6,6 @@
 #include <iostream>
 
 struct TestBot : Bot {
-	using Bot::Bot;
-
 	void update() {
 		go(10);
 		turn(glm::radians(5.0));
