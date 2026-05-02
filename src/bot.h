@@ -11,7 +11,7 @@ struct Bot {
 	glm::vec2 prev_position;
 	float prev_rotation;
 
-	Bot(glm::vec2 position);
+	Bot();
 
 	virtual void init() {}
 	void before_update();

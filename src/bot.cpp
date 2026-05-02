@@ -1,8 +1,8 @@
 #include "bot.h"
 #include <raylib.h>
 
-Bot::Bot(glm::vec2 position) {
-	this->position = this->prev_position = position;
+Bot::Bot() {
+	this->position = this->prev_position = { 0, 0 };
 	this->rotation = this->prev_rotation = 0;
 }
 

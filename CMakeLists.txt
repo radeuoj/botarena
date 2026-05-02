@@ -3,9 +3,14 @@ project(botarena)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_subdirectory(libs/raylib)
-add_subdirectory(libs/glm)
+add_subdirectory(libs)
 
-add_executable(botarena "src/main.cpp" "src/bot.h" "src/bot.cpp" "src/arena.h" "src/arena.cpp")
+add_executable(botarena 
+	"src/main.cpp" 
+	"src/bot.h" 
+	"src/bot.cpp" 
+	"src/arena.h" 
+	"src/arena.cpp"
+ "src/luabot.h" "src/luabot.cpp")
 
-target_link_libraries(botarena raylib glm)
+target_link_libraries(botarena raylib glm lua)

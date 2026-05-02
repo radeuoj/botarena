@@ -2,6 +2,7 @@
 #include <format>
 #include "bot.h"
 #include "arena.h"
+#include "luabot.h"
 #include <iostream>
 
 struct TestBot : Bot {
@@ -17,9 +18,14 @@ int main() {
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
 	InitWindow(900, 600, "Bot Arena");
 
-	TestBot bot({ 100, 100 });
+	TestBot test_bot;
+	test_bot.position = { 300, 300 };
+	LuaBot lua_bot("luabots/test.lua");
+
 	Arena arena;
-	arena.bots.push_back(&bot);
+	arena.bots.push_back(&test_bot);
+	arena.bots.push_back(&lua_bot);
+	arena.init();
 	
 	while (!WindowShouldClose()) {
 		BeginDrawing();

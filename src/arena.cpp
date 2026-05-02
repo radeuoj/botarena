@@ -1,5 +1,11 @@
 #include "arena.h"
 
+void Arena::init() {
+	for (Bot* bot : bots) {
+		bot->init();
+	}
+}
+
 void Arena::try_update_and_draw() {
 	auto now = std::chrono::steady_clock::now();
 	auto delta = std::chrono::duration<double>(now - last_update);
