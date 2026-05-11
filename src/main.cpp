@@ -9,6 +9,7 @@
 #include <backends/imgui_impl_opengl3.h>
 #include <GLFW/glfw3.h>
 #include <rlgl.h>
+#include <functional>
 
 struct TestBot : Bot {
 	using Bot::Bot;
@@ -37,7 +38,7 @@ void init_imgui() {
 	ImGui_ImplOpenGL3_Init();
 }
 
-void render_imgui(void (*fn)()) {
+void render_imgui(std::function<void()> fn) {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
@@ -51,6 +52,30 @@ void render_imgui(void (*fn)()) {
 	ImGui::UpdatePlatformWindows();
 	ImGui::RenderPlatformWindowsDefault();
 	glfwMakeContextCurrent(mainCtx);
+}
+
+void draw_menu(Arena& arena) {
+	ImGui::Begin("Bot Arena");
+
+	ImGui::Text("Welcome to Bot Arena");
+	ImGui::Text("Start a battle!");
+
+	if (ImGui::BeginTable("Bots table", 2)) {
+		for (int i = 0; i < arena.bots.size(); i++) {
+			ImGui::TableNextRow();
+
+			ImGui::TableNextColumn();
+			ImGui::Text(arena.bots[i]->name.c_str());
+
+			ImGui::TableNextColumn();
+			ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - 50);
+			ImGui::Button(std::format("Remove##{}", i).c_str());
+		}
+
+		ImGui::EndTable();
+	}
+
+	ImGui::End();
 }
 
 int main() {
@@ -79,13 +104,17 @@ int main() {
 
 		rlDrawRenderBatchActive();
 
-		render_imgui([]() {
-			ImGui::Begin("Bot Arena");
+		render_imgui([&arena]() {
+			ImGui::Begin("Bot Arena debug");
 
 			ImGui::Text("SALUTUTUTUTUT");
 			ImGui::Text(std::format("FPS: {:.2f}", 1.0 / GetFrameTime()).c_str());
 
 			ImGui::End();
+
+			ImGui::ShowDemoWindow();
+
+			draw_menu(arena);
 		});
 
 		EndDrawing();
