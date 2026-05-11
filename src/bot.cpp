@@ -1,7 +1,7 @@
 #include "bot.h"
 #include <raylib.h>
 
-Bot::Bot() {
+Bot::Bot(std::string name) : name(name) {
 	this->position = this->prev_position = { 0, 0 };
 	this->rotation = this->prev_rotation = 0;
 }

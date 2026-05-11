@@ -1,4 +1,4 @@
-print("Salut")
+name = "Tudor"
 
 function init()
 	print("INIT")

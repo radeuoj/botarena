@@ -1,9 +1,12 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <string>
 
 struct Bot {
 	static constexpr float SIZE = 100.0f;
+
+	std::string name;
 
 	glm::vec2 position;
 	float rotation;
@@ -11,7 +14,7 @@ struct Bot {
 	glm::vec2 prev_position;
 	float prev_rotation;
 
-	Bot();
+	Bot(std::string name);
 
 	virtual void init() {}
 	void before_update();

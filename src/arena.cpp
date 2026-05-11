@@ -1,8 +1,10 @@
 #include "arena.h"
+#include <iostream>
 
 void Arena::init() {
 	for (Bot* bot : bots) {
 		bot->init();
+		std::cout << "Initialized " << bot->name << '\n';
 	}
 }
 

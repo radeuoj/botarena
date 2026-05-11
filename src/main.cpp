@@ -11,12 +11,16 @@
 #include <rlgl.h>
 
 struct TestBot : Bot {
+	using Bot::Bot;
+
 	void update() {
 		go(10);
 		turn(glm::radians(5.0));
 	}
 };
 struct TestBot2 : Bot {
+	using Bot::Bot;
+
 	void update() {
 		go(10);
 		turn(glm::radians(5.0));
@@ -54,9 +58,9 @@ int main() {
 	InitWindow(900, 600, "Bot Arena");
 	init_imgui();
 
-	TestBot test_bot;
+	TestBot test_bot("Test bot");
 	test_bot.position = { 300, 300 };
-	TestBot2 test_bot2;
+	TestBot2 test_bot2("Test bot 2");
 	test_bot2.position = { 450, 300 };
 	LuaBot lua_bot("luabots/test.lua");
 

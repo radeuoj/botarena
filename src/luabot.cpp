@@ -24,7 +24,7 @@ int lua_turn(lua_State* L) {
 	return 0;
 }
 
-LuaBot::LuaBot(std::string path) : Bot() {
+LuaBot::LuaBot(std::string path) : Bot("Matei") {
 	L = luaL_newstate();
 	luaL_openlibs(L);
 
@@ -39,6 +39,11 @@ LuaBot::LuaBot(std::string path) : Bot() {
 	lua_setglobal(L, "turn");
 
 	luaL_dofile(L, path.c_str());
+
+	lua_getglobal(L, "name");
+	if (lua_isstring(L, -1)) {
+		name = lua_tostring(L, -1);
+	}
 }
 
 LuaBot::~LuaBot() {
