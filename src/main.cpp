@@ -23,17 +23,36 @@ struct TestBot2 : Bot {
 	}
 };
 
-int main() {
-	SetConfigFlags(FLAG_VSYNC_HINT);
-	InitWindow(900, 600, "Bot Arena");
-
+void init_imgui() {
 	ImGui::CreateContext();
 
 	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 	ImGui::GetIO().IniFilename = nullptr;
-	
+
 	ImGui_ImplGlfw_InitForOpenGL(glfwGetCurrentContext(), true);
 	ImGui_ImplOpenGL3_Init();
+}
+
+void render_imgui(void (*fn)()) {
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+
+	fn();
+
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+	GLFWwindow* mainCtx = glfwGetCurrentContext();
+	ImGui::UpdatePlatformWindows();
+	ImGui::RenderPlatformWindowsDefault();
+	glfwMakeContextCurrent(mainCtx);
+}
+
+int main() {
+	SetConfigFlags(FLAG_VSYNC_HINT);
+	InitWindow(900, 600, "Bot Arena");
+	init_imgui();
 
 	TestBot test_bot;
 	test_bot.position = { 300, 300 };
@@ -56,24 +75,14 @@ int main() {
 
 		rlDrawRenderBatchActive();
 
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
+		render_imgui([]() {
+			ImGui::Begin("Bot Arena");
 
-		ImGui::Begin("Bot Arena");
+			ImGui::Text("SALUTUTUTUTUT");
+			ImGui::Text(std::format("FPS: {:.2f}", 1.0 / GetFrameTime()).c_str());
 
-		ImGui::Text("SALUTUTUTUTUT");
-		ImGui::Text(std::format("FPS: {:.2f}", 1.0 / GetFrameTime()).c_str());
-
-		ImGui::End();
-
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-		GLFWwindow* mainCtx = glfwGetCurrentContext();
-		ImGui::UpdatePlatformWindows();
-		ImGui::RenderPlatformWindowsDefault();
-		glfwMakeContextCurrent(mainCtx);
+			ImGui::End();
+		});
 
 		EndDrawing();
 	}
