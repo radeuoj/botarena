@@ -7,3 +7,10 @@
 [submodule "libs/lua"]
 	path = libs/lua
 	url = https://github.com/lua/lua.git
+[submodule "libs/imgui"]
+	path = libs/imgui
+	url = https://github.com/ocornut/imgui.git
+	branch = docking
+[submodule "libs/rlimgui"]
+	path = libs/rlimgui
+	url = https://github.com/raylib-extras/rlImGui.git

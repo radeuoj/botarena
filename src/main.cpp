@@ -4,6 +4,8 @@
 #include "arena.h"
 #include "luabot.h"
 #include <iostream>
+#include <rlImGui.h>
+#include <imgui.h>
 
 struct TestBot : Bot {
 	void update() {
@@ -19,8 +21,9 @@ struct TestBot2 : Bot {
 };
 
 int main() {
-	SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
+	SetConfigFlags(FLAG_VSYNC_HINT);
 	InitWindow(900, 600, "Bot Arena");
+	rlImGuiSetup(true);
 
 	TestBot test_bot;
 	test_bot.position = { 300, 300 };
@@ -41,6 +44,20 @@ int main() {
 		DrawText(std::format("SALUT! FPS: {}", 1.0 / GetFrameTime()).c_str(), 100, 200, 20, RED);
 		arena.try_update_and_draw();
 
+		rlImGuiBegin();
+
+		ImGui::Begin("Bot Arena");
+
+		ImGui::Text("SALUTUTUTUTUT");
+		ImGui::Text(std::format("FPS: {:.2f}", 1.0 / GetFrameTime()).c_str());
+
+		ImGui::End();
+
+		rlImGuiEnd();
+
 		EndDrawing();
 	}
+
+	rlImGuiShutdown();
+	CloseWindow();
 }

@@ -39,3 +39,15 @@ add_library(lua
 )
 
 target_include_directories(lua PUBLIC lua)
+
+add_library(imgui
+	imgui/imgui.cpp
+	imgui/imgui_demo.cpp
+	imgui/imgui_draw.cpp
+	imgui/imgui_tables.cpp
+	imgui/imgui_widgets.cpp
+	rlimgui/rlImGui.cpp
+)
+
+target_link_libraries(imgui raylib)
+target_include_directories(imgui PUBLIC imgui PUBLIC rlimgui)

@@ -11,6 +11,8 @@ add_executable(botarena
 	"src/bot.cpp" 
 	"src/arena.h" 
 	"src/arena.cpp"
- "src/luabot.h" "src/luabot.cpp")
+	"src/luabot.h"
+	"src/luabot.cpp"
+)
 
-target_link_libraries(botarena raylib glm lua)
+target_link_libraries(botarena raylib glm lua imgui)
