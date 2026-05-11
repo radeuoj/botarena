@@ -6,6 +6,7 @@ int lua_go(lua_State* L) {
 	lua_pushlightuserdata(L, (void*)LUABOT_REGISTRY_KEY);
 	lua_gettable(L, LUA_REGISTRYINDEX);
 	LuaBot* bot = (LuaBot*)lua_touserdata(L, -1);
+	lua_pop(L, 1);
 
 	float delta = luaL_checknumber(L, 1);
 	bot->go(delta);
@@ -17,6 +18,7 @@ int lua_turn(lua_State* L) {
 	lua_pushlightuserdata(L, (void*)LUABOT_REGISTRY_KEY);
 	lua_gettable(L, LUA_REGISTRYINDEX);
 	LuaBot* bot = (LuaBot*)lua_touserdata(L, -1);
+	lua_pop(L, 1);
 
 	float delta = luaL_checknumber(L, 1);
 	bot->turn(delta);
@@ -44,6 +46,7 @@ LuaBot::LuaBot(std::string path) : Bot("Matei") {
 	if (lua_isstring(L, -1)) {
 		name = lua_tostring(L, -1);
 	}
+	lua_pop(L, 1);
 }
 
 LuaBot::~LuaBot() {
