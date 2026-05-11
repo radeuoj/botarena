@@ -4,8 +4,11 @@
 #include "arena.h"
 #include "luabot.h"
 #include <iostream>
-#include <rlImGui.h>
 #include <imgui.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl3.h>
+#include <GLFW/glfw3.h>
+#include <rlgl.h>
 
 struct TestBot : Bot {
 	void update() {
@@ -23,7 +26,14 @@ struct TestBot2 : Bot {
 int main() {
 	SetConfigFlags(FLAG_VSYNC_HINT);
 	InitWindow(900, 600, "Bot Arena");
-	rlImGuiSetup(true);
+
+	ImGui::CreateContext();
+
+	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+	ImGui::GetIO().IniFilename = nullptr;
+	
+	ImGui_ImplGlfw_InitForOpenGL(glfwGetCurrentContext(), true);
+	ImGui_ImplOpenGL3_Init();
 
 	TestBot test_bot;
 	test_bot.position = { 300, 300 };
@@ -44,7 +54,11 @@ int main() {
 		DrawText(std::format("SALUT! FPS: {}", 1.0 / GetFrameTime()).c_str(), 100, 200, 20, RED);
 		arena.try_update_and_draw();
 
-		rlImGuiBegin();
+		rlDrawRenderBatchActive();
+
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
 
 		ImGui::Begin("Bot Arena");
 
@@ -53,11 +67,20 @@ int main() {
 
 		ImGui::End();
 
-		rlImGuiEnd();
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		GLFWwindow* mainCtx = glfwGetCurrentContext();
+		ImGui::UpdatePlatformWindows();
+		ImGui::RenderPlatformWindowsDefault();
+		glfwMakeContextCurrent(mainCtx);
 
 		EndDrawing();
 	}
 
-	rlImGuiShutdown();
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+
 	CloseWindow();
 }
