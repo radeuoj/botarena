@@ -31,9 +31,14 @@ struct TestBot2 : Bot {
 
 void init_imgui() {
 	ImGui::CreateContext();
+	float dpi = GetWindowScaleDPI().x;
 
 	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 	ImGui::GetIO().IniFilename = nullptr;
+	ImGui::GetIO().FontGlobalScale = dpi;
+
+	ImGui::GetStyle().ScaleAllSizes(dpi);
+	std::cout << dpi << '\n';
 
 	ImGui_ImplGlfw_InitForOpenGL(glfwGetCurrentContext(), true);
 	ImGui_ImplOpenGL3_Init();
@@ -116,7 +121,7 @@ void draw_menu(Arena& arena) {
 }
 
 int main() {
-	SetConfigFlags(FLAG_VSYNC_HINT);
+	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
 	InitWindow(900, 600, "Bot Arena");
 	init_imgui();
 	NFD::Init();
