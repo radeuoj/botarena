@@ -10,6 +10,7 @@
 #include <GLFW/glfw3.h>
 #include <rlgl.h>
 #include <functional>
+#include <nfd.hpp>
 
 struct TestBot : Bot {
 	using Bot::Bot;
@@ -55,12 +56,20 @@ void render_imgui(std::function<void()> fn) {
 }
 
 void draw_menu(Arena& arena) {
+	ImGui::SetNextWindowSize(ImVec2(500.0f, 0.0f), ImGuiCond_FirstUseEver);
 	ImGui::Begin("Bot Arena");
 
 	ImGui::Text("Welcome to Bot Arena");
 	ImGui::Text("Start a battle!");
+	ImGui::Text("");
 
-	if (ImGui::BeginTable("Bots table", 2)) {
+	if (ImGui::BeginTable("Bots table", 2, ImGuiTableFlags_Borders)) {
+		ImGui::TableSetupColumn("Bot name", ImGuiTableColumnFlags_WidthStretch);
+		ImGui::TableSetupColumn("Remove", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHeaderLabel, 50);
+		ImGui::TableHeadersRow();
+
+		int bot_to_delete = -1;
+
 		for (int i = 0; i < arena.bots.size(); i++) {
 			ImGui::TableNextRow();
 
@@ -68,11 +77,39 @@ void draw_menu(Arena& arena) {
 			ImGui::Text(arena.bots[i]->name.c_str());
 
 			ImGui::TableNextColumn();
-			ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - 50);
-			ImGui::Button(std::format("Remove##{}", i).c_str());
+			if (ImGui::Button(std::format("Remove##{}", i).c_str())) {
+				bot_to_delete = i;
+			}
+		}
+
+		if (bot_to_delete != -1) {
+			arena.bots.erase(arena.bots.begin() + bot_to_delete);
 		}
 
 		ImGui::EndTable();
+	}
+
+	if (ImGui::Button("Add bot")) {
+		NFD::UniquePathU8 out_path;
+		if (NFD::OpenDialog(out_path) == NFD_OKAY) {
+			arena.add_lua_bot(out_path.get());
+			std::cout << "Added lua bot at " << out_path.get() << '\n';
+		}
+	}
+
+	ImGui::SameLine();
+	if (ImGui::Button("Resume")) {
+		arena.resume();
+	}
+
+	ImGui::SameLine();
+	if (ImGui::Button("Pause")) {
+		arena.pause();
+	}
+
+	ImGui::SameLine();
+	if (ImGui::Button("Start")) {
+		arena.start();
 	}
 
 	ImGui::End();
@@ -82,18 +119,17 @@ int main() {
 	SetConfigFlags(FLAG_VSYNC_HINT);
 	InitWindow(900, 600, "Bot Arena");
 	init_imgui();
+	NFD::Init();
 
 	TestBot test_bot("Test bot");
-	test_bot.position = { 300, 300 };
+	test_bot.position = test_bot.prev_position = { 300, 300 };
 	TestBot2 test_bot2("Test bot 2");
-	test_bot2.position = { 450, 300 };
-	LuaBot lua_bot("luabots/test.lua");
+	test_bot2.position = test_bot2.prev_position = { 450, 300 };
 
 	Arena arena;
 	arena.bots.push_back(&test_bot);
-	arena.bots.push_back(&lua_bot);
 	arena.bots.push_back(&test_bot2);
-	arena.init();
+	//arena.init();
 	
 	while (!WindowShouldClose()) {
 		BeginDrawing();
@@ -112,8 +148,6 @@ int main() {
 
 			ImGui::End();
 
-			ImGui::ShowDemoWindow();
-
 			draw_menu(arena);
 		});
 
@@ -123,6 +157,6 @@ int main() {
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
-
+	NFD::Quit();
 	CloseWindow();
 }

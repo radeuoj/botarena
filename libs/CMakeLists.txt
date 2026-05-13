@@ -1,5 +1,6 @@
 add_subdirectory(raylib)
 add_subdirectory(glm)
+add_subdirectory(nfd)
 
 add_library(lua
 	lua/lapi.c
@@ -50,5 +51,5 @@ add_library(imgui
 	imgui/backends/imgui_impl_opengl3.cpp
 )
 
-target_link_libraries(imgui raylib glfw)
+target_link_libraries(imgui glfw)
 target_include_directories(imgui PUBLIC imgui PUBLIC rlimgui)

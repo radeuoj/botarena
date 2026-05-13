@@ -15,4 +15,4 @@ add_executable(botarena
 	"src/luabot.cpp"
 )
 
-target_link_libraries(botarena raylib glm lua imgui glfw)
+target_link_libraries(botarena raylib glm lua imgui glfw nfd)
