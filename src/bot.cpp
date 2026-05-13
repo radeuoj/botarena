@@ -1,5 +1,7 @@
 #include "bot.h"
 #include <raylib.h>
+#include <glm/gtc/constants.hpp>
+#include <cmath>
 
 Bot::Bot(std::string name) : name(name) {
 	this->position = this->prev_position = { 0, 0 };
@@ -12,23 +14,70 @@ void Bot::before_update() {
 }
 
 void Bot::draw(float alpha) {
-	glm::vec2 screen_position = glm::mix(prev_position, position, alpha);
-	float screen_rotation = glm::mix(prev_rotation, rotation, alpha);
+    for (size_t i = 0; i < trail.size(); i++) {
+        // Calculăm transparența: punctele mai vechi sunt mai transparente
+        // i = 0 e cel mai nou, i = trail.size()-1 e cel mai vechi
+        float trailAlpha = 1.0f - ((float)i / trail.size());
 
-	Rectangle rect = {
-		.x = screen_position.x,
-		.y = screen_position.y,
-		.width = SIZE,
-		.height = SIZE,
-	};
+        // Culoarea robotului (de ex RED) cu transparență variabilă
+        Color culoare = GetColor(0x2C3E50FF);
+        Color color = Fade(culoare, trailAlpha * 0.2f); // 0.5f pentru a fi mai discret
 
-	DrawRectanglePro(rect, { SIZE / 2, SIZE / 2 }, glm::degrees(screen_rotation), RED);
+        Rectangle trailRect = {
+            .x = trail[i].pos.x,
+            .y = trail[i].pos.y,
+            .width = SIZE,
+            .height = SIZE,
+        };
+
+        DrawRectanglePro(trailRect, { SIZE / 2, SIZE / 2 }, glm::degrees(trail[i].rotation), color);
+    }
+
+    glm::vec2 screen_position = glm::mix(prev_position, position, alpha);
+    float screen_rotation = glm::mix(prev_rotation, rotation, alpha);
+
+    Rectangle rect = {
+        .x = screen_position.x,
+        .y = screen_position.y,
+        .width = SIZE,
+        .height = SIZE,
+    };
+
+    DrawRectanglePro(rect, { SIZE / 2, SIZE / 2 }, glm::degrees(screen_rotation), RED);
 }
 
 
 void Bot::go(float delta) {
-	glm::vec2 direction(glm::cos(rotation), glm::sin(rotation));
-	position += direction * delta;
+    // Înainte de a schimba poziția, o salvăm pentru trail
+    trail.push_front({ position, rotation });
+    if (trail.size() > MAX_TRAIL_SIZE) {
+        trail.pop_back();
+    }
+
+    // Logica ta existentă de mișcare și coliziune cu pereții
+    glm::vec2 direction(glm::cos(rotation), glm::sin(rotation));
+    position += direction * delta;
+
+    // Calculăm limitele ținând cont de centrul robotului
+    float halfSize = SIZE / 2.0f;
+
+    // Constrângem poziția X între margini
+    // GetScreenWidth() returnează 900 (valoarea setată în main)
+    if (position.x < halfSize) {
+        position.x = halfSize;
+    }
+    else if (position.x > GetScreenWidth() - halfSize) {
+        position.x = GetScreenWidth() - halfSize;
+    }
+
+    // Constrângem poziția Y între margini
+    // GetScreenHeight() returnează 600
+    if (position.y < halfSize) {
+        position.y = halfSize;
+    }
+    else if (position.y > GetScreenHeight() - halfSize) {
+        position.y = GetScreenHeight() - halfSize;
+    }
 }
 
 void Bot::turn(float delta) {
