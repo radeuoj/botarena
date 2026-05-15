@@ -14,6 +14,7 @@ struct Bot {
 	static constexpr float SIZE = 100.0f;
 
 	std::string name;
+	float health;
 
 	glm::vec2 position;
 	float rotation;
@@ -22,7 +23,7 @@ struct Bot {
 	float prev_rotation;
 
 	std::deque<TrailPoint> trail;
-	static constexpr size_t MAX_TRAIL_SIZE = 15;
+	static constexpr size_t MAX_TRAIL_SIZE = 50;
 
 	Bot(std::string name);
 
@@ -30,7 +31,7 @@ struct Bot {
 	void before_update();
 	virtual void update() {}
 	void draw(float alpha);
-	void draw_trail();
+	void draw_trail(float alpha);
 	void draw_name(float alpha);
 
 	void go(float speed);

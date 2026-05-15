@@ -38,7 +38,7 @@ void init_imgui() {
 	ImGui::GetIO().FontGlobalScale = dpi;
 
 	ImGui::GetStyle().ScaleAllSizes(dpi);
-	std::cout << dpi << '\n';
+	std::cout << "Display scale DPI: " << dpi << '\n';
 
 	ImGui_ImplGlfw_InitForOpenGL(glfwGetCurrentContext(), true);
 	ImGui_ImplOpenGL3_Init();
@@ -68,8 +68,9 @@ void draw_menu(Arena& arena) {
 	ImGui::Text("Start a battle!");
 	ImGui::Text("");
 
-	if (ImGui::BeginTable("Bots table", 2, ImGuiTableFlags_Borders)) {
+	if (ImGui::BeginTable("Bots table", 3, ImGuiTableFlags_Borders)) {
 		ImGui::TableSetupColumn("Bot name", ImGuiTableColumnFlags_WidthStretch);
+		ImGui::TableSetupColumn("Health", ImGuiTableColumnFlags_WidthFixed, 50);
 		ImGui::TableSetupColumn("Remove", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHeaderLabel, 50);
 		ImGui::TableHeadersRow();
 
@@ -80,6 +81,9 @@ void draw_menu(Arena& arena) {
 
 			ImGui::TableNextColumn();
 			ImGui::Text(arena.bots[i]->name.c_str());
+
+			ImGui::TableNextColumn();
+			ImGui::Text(std::format("{:.2f}", arena.bots[i]->health).c_str());
 
 			ImGui::TableNextColumn();
 			if (ImGui::Button(std::format("Remove##{}", i).c_str())) {
@@ -149,6 +153,7 @@ int main() {
 
 			ImGui::Text("SALUTUTUTUTUT");
 			ImGui::Text(std::format("FPS: {:.2f}", 1.0 / GetFrameTime()).c_str());
+			ImGui::Checkbox("Draw trails", &arena.draw_trail);
 
 			ImGui::End();
 

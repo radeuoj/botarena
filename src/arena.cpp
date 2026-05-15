@@ -2,7 +2,7 @@
 #include <iostream>
 #include <raylib.h>
 
-Arena::Arena() : is_paused(true) {
+Arena::Arena() : is_paused(true), draw_trail(true) {
 
 }
 
@@ -36,8 +36,10 @@ void Arena::update() {
 }
 
 void Arena::draw(float alpha) {
-	for (Bot* bot : bots) {
-		bot->draw_trail();
+	if (draw_trail) {
+		for (Bot* bot : bots) {
+			bot->draw_trail(alpha);
+		}
 	}
 
 	for (Bot* bot : bots) {

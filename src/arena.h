@@ -14,6 +14,7 @@ struct Arena {
 	std::vector<Bot*> bots;
 	std::chrono::steady_clock::time_point last_update;
 	bool is_paused;
+	bool draw_trail;
 
 	Arena();
 
