@@ -15,6 +15,7 @@ struct Arena {
 	std::chrono::steady_clock::time_point last_update;
 	bool is_paused;
 	bool draw_trail;
+	int tick;
 
 	Arena();
 

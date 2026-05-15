@@ -1,9 +1,4 @@
-name = "Tudor"
-
-function init()
-	print("INIT")
-	turn(math.pi / 4)
-end
+name = "gun oscillator"
 
 function update()
 	go(10);

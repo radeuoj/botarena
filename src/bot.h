@@ -18,9 +18,18 @@ struct Bot {
 
 	glm::vec2 position;
 	float rotation;
+	float gun_rotation; // relative to rotation
+	float radar_rotation; // relative to rotation
 
 	glm::vec2 prev_position;
 	float prev_rotation;
+	float prev_gun_rotation;
+	float prev_radar_rotation;
+
+	glm::vec2 screen_position;
+	float screen_rotation;
+	float screen_gun_rotation;
+	float screen_radar_rotation;
 
 	std::deque<TrailPoint> trail;
 	static constexpr size_t MAX_TRAIL_SIZE = 50;
@@ -30,10 +39,12 @@ struct Bot {
 	virtual void init() {}
 	void before_update();
 	virtual void update() {}
-	void draw(float alpha);
-	void draw_trail(float alpha);
-	void draw_name(float alpha);
+	void before_draw(float alpha);
+	void draw();
+	void draw_trail();
+	void draw_name();
 
-	void go(float speed);
-	void turn(float speed);
+	void go(float delta);
+	void turn(float delta);
+	void turn_gun(float delta);
 };

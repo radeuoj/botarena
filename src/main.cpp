@@ -124,6 +124,17 @@ void draw_menu(Arena& arena) {
 	ImGui::End();
 }
 
+void draw_debug_window(Arena& arena) {
+	ImGui::Begin("Bot Arena debug");
+
+	ImGui::Text("SALUTUTUTUTUT");
+	ImGui::Text(std::format("FPS: {:.2f}", 1.0 / GetFrameTime()).c_str());
+	ImGui::Checkbox("Draw trails", &arena.draw_trail);
+	ImGui::Text("Tick: %d", arena.tick);
+
+	ImGui::End();
+}
+
 int main() {
 	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
 	InitWindow(Arena::WIDTH, Arena::HEIGHT, "Bot Arena");
@@ -149,14 +160,7 @@ int main() {
 		rlDrawRenderBatchActive();
 
 		render_imgui([&arena]() {
-			ImGui::Begin("Bot Arena debug");
-
-			ImGui::Text("SALUTUTUTUTUT");
-			ImGui::Text(std::format("FPS: {:.2f}", 1.0 / GetFrameTime()).c_str());
-			ImGui::Checkbox("Draw trails", &arena.draw_trail);
-
-			ImGui::End();
-
+			draw_debug_window(arena);
 			draw_menu(arena);
 		});
 

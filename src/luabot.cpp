@@ -26,6 +26,18 @@ int lua_turn(lua_State* L) {
 	return 0;
 }
 
+int lua_turn_gun(lua_State* L) {
+	lua_pushlightuserdata(L, (void*)LUABOT_REGISTRY_KEY);
+	lua_gettable(L, LUA_REGISTRYINDEX);
+	LuaBot* bot = (LuaBot*)lua_touserdata(L, -1);
+	lua_pop(L, 1);
+
+	float delta = luaL_checknumber(L, 1);
+	bot->turn_gun(delta);
+
+	return 0;
+}
+
 LuaBot::LuaBot(std::string path) : Bot("Matei") {
 	L = luaL_newstate();
 	luaL_openlibs(L);
@@ -39,6 +51,9 @@ LuaBot::LuaBot(std::string path) : Bot("Matei") {
 
 	lua_pushcfunction(L, lua_turn);
 	lua_setglobal(L, "turn");
+
+	lua_pushcfunction(L, lua_turn_gun);
+	lua_setglobal(L, "turn_gun");
 
 	luaL_dofile(L, path.c_str());
 
@@ -55,10 +70,20 @@ LuaBot::~LuaBot() {
 
 void LuaBot::init() {
 	lua_getglobal(L, "init");
-	lua_call(L, 0, 0);
+
+	if (lua_isfunction(L, -1)) {
+		lua_call(L, 0, 0);
+	} else {
+		lua_pop(L, 1);
+	}
 }
 
 void LuaBot::update() {
 	lua_getglobal(L, "update");
-	lua_call(L, 0, 0);
+
+	if (lua_isfunction(L, -1)) {
+		lua_call(L, 0, 0);
+	} else {
+		lua_pop(L, 1);
+	}
 }

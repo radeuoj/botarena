@@ -2,7 +2,7 @@
 #include <iostream>
 #include <raylib.h>
 
-Arena::Arena() : is_paused(true), draw_trail(true) {
+Arena::Arena() : is_paused(true), draw_trail(true), tick(0) {
 
 }
 
@@ -33,21 +33,27 @@ void Arena::update() {
 		bot->before_update();
 		bot->update();
 	}
+
+	tick++;
 }
 
 void Arena::draw(float alpha) {
+	for (Bot* bot : bots) {
+		bot->before_draw(alpha);
+	}
+
 	if (draw_trail) {
 		for (Bot* bot : bots) {
-			bot->draw_trail(alpha);
+			bot->draw_trail();
 		}
 	}
 
 	for (Bot* bot : bots) {
-		bot->draw(alpha);
+		bot->draw();
 	}
 
 	for (Bot* bot : bots) {
-		bot->draw_name(alpha);
+		bot->draw_name();
 	}
 }
 
@@ -79,6 +85,8 @@ void Arena::pause() {
 	for (Bot* bot : bots) {
 		bot->prev_position = bot->position;
 		bot->prev_rotation = bot->rotation;
+		bot->prev_gun_rotation = bot->gun_rotation;
+		bot->prev_radar_rotation = bot->radar_rotation;
 	}
 }
 
