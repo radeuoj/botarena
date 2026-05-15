@@ -122,9 +122,10 @@ void draw_menu(Arena& arena) {
 
 int main() {
 	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
-	InitWindow(900, 600, "Bot Arena");
+	InitWindow(Arena::WIDTH, Arena::HEIGHT, "Bot Arena");
 	init_imgui();
 	NFD::Init();
+	srand(time(0));
 
 	TestBot test_bot("Test bot");
 	test_bot.position = test_bot.prev_position = { 300, 300 };
@@ -134,13 +135,11 @@ int main() {
 	Arena arena;
 	arena.bots.push_back(&test_bot);
 	arena.bots.push_back(&test_bot2);
-	//arena.init();
 	
 	while (!WindowShouldClose()) {
 		BeginDrawing();
 		
 		ClearBackground(BLACK);
-		DrawText(std::format("SALUT! FPS: {}", 1.0 / GetFrameTime()).c_str(), 100, 200, 20, RED);
 		arena.try_update_and_draw();
 
 		rlDrawRenderBatchActive();

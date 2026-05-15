@@ -11,7 +11,7 @@ struct TrailPoint {
 };
 
 struct Bot {
-	const float SIZE = 100.0f;
+	static constexpr float SIZE = 100.0f;
 
 	std::string name;
 
@@ -22,7 +22,7 @@ struct Bot {
 	float prev_rotation;
 
 	std::deque<TrailPoint> trail;
-	const size_t MAX_TRAIL_SIZE = 15;
+	static constexpr size_t MAX_TRAIL_SIZE = 15;
 
 	Bot(std::string name);
 
@@ -31,6 +31,7 @@ struct Bot {
 	virtual void update() {}
 	void draw(float alpha);
 	void draw_trail();
+	void draw_name(float alpha);
 
 	void go(float speed);
 	void turn(float speed);

@@ -2,6 +2,7 @@
 #include <raylib.h>
 #include <glm/gtc/constants.hpp>
 #include <cmath>
+#include <iostream>
 
 Bot::Bot(std::string name) : name(name) {
 	this->position = this->prev_position = { 0, 0 };
@@ -48,6 +49,17 @@ void Bot::draw_trail() {
     }
 }
 
+void Bot::draw_name(float alpha) {
+    glm::vec2 screen_position = glm::mix(prev_position, position, alpha);
+    float screen_rotation = glm::mix(prev_rotation, rotation, alpha);
+
+    const char* text = name.c_str();
+    int font_size = 20;
+    int x = glm::round(screen_position.x - MeasureText(text, font_size) / 2.0f);
+    int y = glm::round(screen_position.y - 0.75f * SIZE);
+
+    DrawText(text, x, y, font_size, WHITE);
+}
 
 void Bot::go(float delta) {
     delta = glm::clamp(delta, -10.0f, 10.0f);

@@ -1,5 +1,6 @@
 #include "arena.h"
 #include <iostream>
+#include <raylib.h>
 
 Arena::Arena() : is_paused(true) {
 
@@ -42,15 +43,28 @@ void Arena::draw(float alpha) {
 	for (Bot* bot : bots) {
 		bot->draw(alpha);
 	}
+
+	for (Bot* bot : bots) {
+		bot->draw_name(alpha);
+	}
+}
+
+glm::vec2 get_random_position() {
+	float x = (float)rand() / RAND_MAX * Arena::WIDTH;
+	float y = (float)rand() / RAND_MAX * Arena::HEIGHT;
+	return { x, y };
+}
+
+float get_random_rotation() {
+	return (float)rand() / RAND_MAX * 2 * PI;
 }
 
 void Arena::add_lua_bot(const std::string& path) {
-	if (lua_bots.contains(path)) {
-		bots.erase(std::find(bots.begin(), bots.end(), lua_bots[path].get()));
-	}
-
-	lua_bots[path] = std::make_unique<LuaBot>(path);
-	bots.push_back(lua_bots[path].get());
+	auto bot = std::make_unique<LuaBot>(path);
+	bot->position = bot->prev_position = get_random_position();
+	bot->rotation = bot->prev_rotation = get_random_rotation();
+	bots.push_back(bot.get());
+	lua_bots.push_back(std::move(bot));
 }
 
 void Arena::resume() {
