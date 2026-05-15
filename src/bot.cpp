@@ -14,6 +14,20 @@ void Bot::before_update() {
 }
 
 void Bot::draw(float alpha) {
+    glm::vec2 screen_position = glm::mix(prev_position, position, alpha);
+    float screen_rotation = glm::mix(prev_rotation, rotation, alpha);
+
+    Rectangle rect = {
+        .x = screen_position.x,
+        .y = screen_position.y,
+        .width = SIZE,
+        .height = SIZE,
+    };
+
+    DrawRectanglePro(rect, { SIZE / 2, SIZE / 2 }, glm::degrees(screen_rotation), RED);
+}
+
+void Bot::draw_trail() {
     for (size_t i = 0; i < trail.size(); i++) {
         // Calculăm transparența: punctele mai vechi sunt mai transparente
         // i = 0 e cel mai nou, i = trail.size()-1 e cel mai vechi
@@ -32,22 +46,12 @@ void Bot::draw(float alpha) {
 
         DrawRectanglePro(trailRect, { SIZE / 2, SIZE / 2 }, glm::degrees(trail[i].rotation), color);
     }
-
-    glm::vec2 screen_position = glm::mix(prev_position, position, alpha);
-    float screen_rotation = glm::mix(prev_rotation, rotation, alpha);
-
-    Rectangle rect = {
-        .x = screen_position.x,
-        .y = screen_position.y,
-        .width = SIZE,
-        .height = SIZE,
-    };
-
-    DrawRectanglePro(rect, { SIZE / 2, SIZE / 2 }, glm::degrees(screen_rotation), RED);
 }
 
 
 void Bot::go(float delta) {
+    delta = glm::clamp(delta, -10.0f, 10.0f);
+
     // Înainte de a schimba poziția, o salvăm pentru trail
     trail.push_front({ position, rotation });
     if (trail.size() > MAX_TRAIL_SIZE) {
@@ -81,5 +85,7 @@ void Bot::go(float delta) {
 }
 
 void Bot::turn(float delta) {
+    delta = glm::clamp(delta, -PI / 20, PI / 20);
+
 	rotation += delta;
 }

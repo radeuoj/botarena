@@ -36,6 +36,10 @@ void Arena::update() {
 
 void Arena::draw(float alpha) {
 	for (Bot* bot : bots) {
+		bot->draw_trail();
+	}
+
+	for (Bot* bot : bots) {
 		bot->draw(alpha);
 	}
 }

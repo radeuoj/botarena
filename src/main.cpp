@@ -61,7 +61,7 @@ void render_imgui(std::function<void()> fn) {
 }
 
 void draw_menu(Arena& arena) {
-	ImGui::SetNextWindowSize(ImVec2(500.0f, 0.0f), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2(500.0f, 0.0f), ImGuiCond_Always);
 	ImGui::Begin("Bot Arena");
 
 	ImGui::Text("Welcome to Bot Arena");

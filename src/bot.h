@@ -11,7 +11,7 @@ struct TrailPoint {
 };
 
 struct Bot {
-	static constexpr float SIZE = 100.0f;
+	const float SIZE = 100.0f;
 
 	std::string name;
 
@@ -30,6 +30,7 @@ struct Bot {
 	void before_update();
 	virtual void update() {}
 	void draw(float alpha);
+	void draw_trail();
 
 	void go(float speed);
 	void turn(float speed);

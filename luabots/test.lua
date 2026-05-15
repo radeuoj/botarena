@@ -7,4 +7,5 @@ end
 
 function update()
 	go(10);
+	turn(2 * math.pi)
 end
