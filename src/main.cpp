@@ -62,7 +62,7 @@ void render_imgui(std::function<void()> fn) {
 	glfwMakeContextCurrent(mainCtx);
 }
 
-void draw_menu(Arena& arena) {
+void draw_menu(Arena& arena, float dpi) {
 	ImGui::SetNextWindowSize(ImVec2(500.0f, 0.0f), ImGuiCond_Always);
 	ImGui::Begin("Bot Arena");
 
@@ -72,8 +72,8 @@ void draw_menu(Arena& arena) {
 
 	if (ImGui::BeginTable("Bots table", 3, ImGuiTableFlags_Borders)) {
 		ImGui::TableSetupColumn("Bot name", ImGuiTableColumnFlags_WidthStretch);
-		ImGui::TableSetupColumn("Health", ImGuiTableColumnFlags_WidthFixed, 50);
-		ImGui::TableSetupColumn("Remove", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHeaderLabel, 50);
+		ImGui::TableSetupColumn("Health", ImGuiTableColumnFlags_WidthFixed, 50 * dpi);
+		ImGui::TableSetupColumn("Remove", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHeaderLabel, 50 * dpi);
 		ImGui::TableHeadersRow();
 
 		int bot_to_delete = -1;
@@ -171,7 +171,7 @@ int main() {
 
 		render_imgui([&arena]() {
 			draw_debug_window(arena);
-			draw_menu(arena);
+			draw_menu(arena, GetWindowScaleDPI().x);
 		});
 
 		EndDrawing();
