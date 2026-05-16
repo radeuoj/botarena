@@ -38,7 +38,18 @@ int lua_turn_gun(lua_State* L) {
 	return 0;
 }
 
-LuaBot::LuaBot(std::string path) : Bot("Matei") {
+int lua_shoot(lua_State* L) {
+	lua_pushlightuserdata(L, (void*)LUABOT_REGISTRY_KEY);
+	lua_gettable(L, LUA_REGISTRYINDEX);
+	LuaBot* bot = (LuaBot*)lua_touserdata(L, -1);
+	lua_pop(L, 1);
+
+	bot->shoot();
+
+	return 0;
+}
+
+LuaBot::LuaBot(std::string path, Arena* arena) : Bot("Matei", arena) {
 	L = luaL_newstate();
 	luaL_openlibs(L);
 
@@ -54,6 +65,9 @@ LuaBot::LuaBot(std::string path) : Bot("Matei") {
 
 	lua_pushcfunction(L, lua_turn_gun);
 	lua_setglobal(L, "turn_gun");
+
+	lua_pushcfunction(L, lua_shoot);
+	lua_setglobal(L, "shoot");
 
 	luaL_dofile(L, path.c_str());
 

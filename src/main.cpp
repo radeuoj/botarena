@@ -131,6 +131,21 @@ void draw_debug_window(Arena& arena) {
 	ImGui::Text(std::format("FPS: {:.2f}", 1.0 / GetFrameTime()).c_str());
 	ImGui::Checkbox("Draw trails", &arena.draw_trail);
 	ImGui::Text("Tick: %d", arena.tick);
+	ImGui::Text("Bullets alive: %d", arena.bullets.size());
+
+	static TestBot test_bot("Test bot", &arena);
+	static TestBot2 test_bot2("Test bot 2", &arena);
+
+	if (ImGui::Button("Add test bot 1")) {
+		test_bot.position = test_bot.prev_position = { 300, 300 };
+		arena.bots.push_back(&test_bot);
+	}
+
+	ImGui::SameLine();
+	if (ImGui::Button("Add test bot 2")) {
+		test_bot2.position = test_bot2.prev_position = { 450, 300 };
+		arena.bots.push_back(&test_bot2);
+	}
 
 	ImGui::End();
 }
@@ -142,14 +157,7 @@ int main() {
 	NFD::Init();
 	srand(time(0));
 
-	TestBot test_bot("Test bot");
-	test_bot.position = test_bot.prev_position = { 300, 300 };
-	TestBot2 test_bot2("Test bot 2");
-	test_bot2.position = test_bot2.prev_position = { 450, 300 };
-
 	Arena arena;
-	arena.bots.push_back(&test_bot);
-	arena.bots.push_back(&test_bot2);
 	
 	while (!WindowShouldClose()) {
 		BeginDrawing();

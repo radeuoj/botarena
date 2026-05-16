@@ -11,7 +11,7 @@ extern "C" {
 struct LuaBot : Bot {
 	lua_State* L;
 
-	LuaBot(std::string path);
+	LuaBot(std::string path, Arena* arena);
 	~LuaBot();
 
 	void init();

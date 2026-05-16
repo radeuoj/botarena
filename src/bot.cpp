@@ -3,13 +3,15 @@
 #include <glm/gtc/constants.hpp>
 #include <cmath>
 #include <iostream>
+#include "arena.h"
 
-Bot::Bot(std::string name) : name(name) {
+Bot::Bot(std::string name, Arena* arena) : name(name), arena(arena) {
 	position = prev_position = screen_position = { 0, 0 };
     rotation = prev_rotation = screen_rotation = 0;
     gun_rotation = prev_gun_rotation = screen_gun_rotation = 0;
     radar_rotation = prev_radar_rotation = screen_radar_rotation = 0;
     health = 100.0f;
+    last_shoot_tick = 0;
 }
 
 void Bot::before_update() {
@@ -144,4 +146,19 @@ void Bot::turn(float delta) {
 void Bot::turn_gun(float delta) {
     delta = glm::clamp(delta, -PI / 10, PI / 10);
     gun_rotation += delta;
+}
+
+void Bot::shoot() {
+    if (arena->tick - last_shoot_tick < SHOOT_DELTA_TICKS) {
+        return;
+    }
+
+    last_shoot_tick = arena->tick;
+    glm::vec2 direction = glm::vec2(cos(rotation + gun_rotation), sin(rotation + gun_rotation));
+
+    arena->bullets.emplace_back(
+        position + direction * SIZE / 2.0f,
+        direction,
+        this
+    );
 }

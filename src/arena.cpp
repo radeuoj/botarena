@@ -29,17 +29,48 @@ void Arena::try_update_and_draw() {
 void Arena::update() {
 	if (is_paused) return;
 
+	for (Bullet& bullet : bullets) {
+		bullet.before_update();
+		bullet.update();
+	}
+
 	for (Bot* bot : bots) {
 		bot->before_update();
 		bot->update();
 	}
 
+	// check for collisions
+
+	clean_bullets();
+
 	tick++;
 }
 
+void Arena::clean_bullets() {
+	for (Bullet& bullet : bullets) {
+		if (bullet.position.x <= -Bullet::RADIUS ||
+			bullet.position.x >= Arena::WIDTH + Bullet::RADIUS ||
+			bullet.position.y <= -Bullet::RADIUS ||
+			bullet.position.y >= Arena::HEIGHT + Bullet::RADIUS) {
+
+			bullet.dead = true;
+		}
+	}
+
+	bullets.erase(std::remove_if(bullets.begin(), bullets.end(), [](const Bullet& bullet) {
+		return bullet.dead;
+	}), bullets.end());
+}
+
 void Arena::draw(float alpha) {
+	if (is_paused) alpha = 1.0f;
+
 	for (Bot* bot : bots) {
 		bot->before_draw(alpha);
+	}
+
+	for (Bullet& bullet : bullets) {
+		bullet.before_draw(alpha);
 	}
 
 	if (draw_trail) {
@@ -52,14 +83,18 @@ void Arena::draw(float alpha) {
 		bot->draw();
 	}
 
+	for (Bullet& bullet : bullets) {
+		bullet.draw();
+	}
+
 	for (Bot* bot : bots) {
 		bot->draw_name();
 	}
 }
 
 glm::vec2 get_random_position() {
-	float x = (float)rand() / RAND_MAX * Arena::WIDTH;
-	float y = (float)rand() / RAND_MAX * Arena::HEIGHT;
+	float x = (float)rand() / RAND_MAX * (Arena::WIDTH - Bot::SIZE) + Bot::SIZE / 2.0f;
+	float y = (float)rand() / RAND_MAX * (Arena::HEIGHT - Bot::SIZE) + Bot::SIZE / 2.0f;
 	return { x, y };
 }
 
@@ -68,7 +103,7 @@ float get_random_rotation() {
 }
 
 void Arena::add_lua_bot(const std::string& path) {
-	auto bot = std::make_unique<LuaBot>(path);
+	auto bot = std::make_unique<LuaBot>(path, this);
 	bot->position = bot->prev_position = get_random_position();
 	bot->rotation = bot->prev_rotation = get_random_rotation();
 	bots.push_back(bot.get());
@@ -81,13 +116,6 @@ void Arena::resume() {
 
 void Arena::pause() {
 	is_paused = true;
-
-	for (Bot* bot : bots) {
-		bot->prev_position = bot->position;
-		bot->prev_rotation = bot->rotation;
-		bot->prev_gun_rotation = bot->gun_rotation;
-		bot->prev_radar_rotation = bot->radar_rotation;
-	}
 }
 
 void Arena::start() {
