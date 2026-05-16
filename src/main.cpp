@@ -29,6 +29,8 @@ struct TestBot2 : Bot {
 	}
 };
 
+bool show_debug_window = false;
+
 void init_imgui() {
 	ImGui::CreateContext();
 	float dpi = GetWindowScaleDPI().x;
@@ -73,7 +75,7 @@ void draw_menu(Arena& arena, float dpi) {
 	if (ImGui::BeginTable("Bots table", 3, ImGuiTableFlags_Borders)) {
 		ImGui::TableSetupColumn("Bot name", ImGuiTableColumnFlags_WidthStretch);
 		ImGui::TableSetupColumn("Health", ImGuiTableColumnFlags_WidthFixed, 50 * dpi);
-		ImGui::TableSetupColumn("Remove", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHeaderLabel, 50 * dpi);
+		ImGui::TableSetupColumn("Remove", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHeaderLabel, 60 * dpi);
 		ImGui::TableHeadersRow();
 
 		int bot_to_delete = -1;
@@ -101,10 +103,18 @@ void draw_menu(Arena& arena, float dpi) {
 	}
 
 	if (ImGui::Button("Add bot")) {
-		NFD::UniquePathU8 out_path;
-		if (NFD::OpenDialog(out_path) == NFD_OKAY) {
-			arena.add_lua_bot(out_path.get());
-			std::cout << "Added lua bot at " << out_path.get() << '\n';
+		NFD::UniquePathSet out_paths;
+		if (NFD::OpenDialogMultiple(out_paths) == NFD_OKAY) {
+			nfdpathsetsize_t num_paths;
+			NFD::PathSet::Count(out_paths, num_paths);
+
+			for (nfdpathsetsize_t i = 0; i < num_paths; ++i) {
+				NFD::UniquePathSetPath path;
+				NFD::PathSet::GetPath(out_paths, i, path);
+
+				arena.add_lua_bot(path.get());
+				std::cout << "Added lua bot at " << path.get() << '\n';
+			}
 		}
 	}
 
@@ -123,11 +133,17 @@ void draw_menu(Arena& arena, float dpi) {
 		arena.start();
 	}
 
+	ImGui::SameLine();
+	if (ImGui::Button("Debug")) {
+		show_debug_window = true;
+	}
+
 	ImGui::End();
 }
 
 void draw_debug_window(Arena& arena) {
-	ImGui::Begin("Bot Arena debug");
+	if (!show_debug_window) return;
+	ImGui::Begin("Bot Arena debug", &show_debug_window);
 
 	ImGui::Text("SALUTUTUTUTUT");
 	ImGui::Text(std::format("FPS: {:.2f}", 1.0 / GetFrameTime()).c_str());
@@ -154,7 +170,13 @@ void draw_debug_window(Arena& arena) {
 	ImGui::End();
 }
 
-int main() {
+void parse_args(int argc, char* argv[], Arena& arena) {
+	for (int i = 1; i < argc; i++) {
+		arena.add_lua_bot(argv[i]);
+	}
+}
+
+int main(int argc, char* argv[]) {
 	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
 	InitWindow(Arena::WIDTH, Arena::HEIGHT, "Bot Arena");
 	init_imgui();
@@ -162,6 +184,7 @@ int main() {
 	srand(time(0));
 
 	Arena arena;
+	parse_args(argc, argv, arena);
 	
 	while (!WindowShouldClose()) {
 		BeginDrawing();
