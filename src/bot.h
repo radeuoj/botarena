@@ -58,5 +58,6 @@ struct Bot {
 	void go(float delta);
 	void turn(float delta);
 	void turn_gun(float delta);
+	void turn_radar(float delta);
 	void shoot();
 };

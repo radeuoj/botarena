@@ -155,6 +155,11 @@ void Bot::turn_gun(float delta) {
     gun_rotation += delta;
 }
 
+void Bot::turn_radar(float delta) {
+    delta = glm::clamp(delta, -PI / 6, PI / 6);
+    radar_rotation += delta;
+}
+
 void Bot::shoot() {
     if (arena->tick - last_shoot_tick < SHOOT_DELTA_TICKS) {
         return;
