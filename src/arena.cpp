@@ -39,11 +39,27 @@ void Arena::update() {
 		bot->update();
 	}
 
-	// check for collisions
-
+	handle_bullet_hits();
 	clean_bullets();
+	clean_dead_bots();
 
 	tick++;
+}
+
+void Arena::handle_bullet_hits() {
+	for (Bullet& bullet : bullets) {
+		for (Bot* bot : bots) {
+			if (bot == bullet.owner) {
+				continue;
+			}
+
+			if (glm::distance(bullet.position, bot->position) <= Bullet::RADIUS + Bot::SIZE / 2.0f) {
+				bot->health -= 10.0f;
+				bullet.dead = true;
+				break;
+			}
+		}
+	}
 }
 
 void Arena::clean_bullets() {
@@ -60,6 +76,12 @@ void Arena::clean_bullets() {
 	bullets.erase(std::remove_if(bullets.begin(), bullets.end(), [](const Bullet& bullet) {
 		return bullet.dead;
 	}), bullets.end());
+}
+
+void Arena::clean_dead_bots() {
+	bots.erase(std::remove_if(bots.begin(), bots.end(), [](Bot* bot) {
+		return bot->health <= 0.0f;
+	}), bots.end());
 }
 
 void Arena::draw(float alpha) {

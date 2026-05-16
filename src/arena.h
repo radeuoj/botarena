@@ -27,6 +27,8 @@ struct Arena {
 	void draw(float alpha);
 	void add_lua_bot(const std::string& path);
 	void clean_bullets();
+	void handle_bullet_hits();
+	void clean_dead_bots();
 
 	void resume();
 	void pause();
