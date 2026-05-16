@@ -33,9 +33,11 @@ void init_imgui() {
 	ImGui::CreateContext();
 	float dpi = GetWindowScaleDPI().x;
 
-	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-	ImGui::GetIO().IniFilename = nullptr;
-	ImGui::GetIO().FontGlobalScale = dpi;
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+	io.IniFilename = nullptr;
+
+	io.Fonts->AddFontFromFileTTF("Karla-Regular.ttf", 16.0f * dpi);
 
 	ImGui::GetStyle().ScaleAllSizes(dpi);
 	std::cout << "Display scale DPI: " << dpi << '\n';
