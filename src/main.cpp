@@ -104,7 +104,7 @@ void draw_menu(Arena& arena, float dpi) {
 
 	if (ImGui::Button("Add bot")) {
 		NFD::UniquePathSet out_paths;
-		if (NFD::OpenDialogMultiple(out_paths) == NFD_OKAY) {
+		if (NFD::OpenDialogMultiple(out_paths, (const nfdnfilteritem_t*)nullptr, 0, (const nfdnchar_t*) nullptr) == NFD_OKAY) {
 			nfdpathsetsize_t num_paths;
 			NFD::PathSet::Count(out_paths, num_paths);
 
