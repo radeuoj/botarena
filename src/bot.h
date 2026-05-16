@@ -39,6 +39,7 @@ struct Bot {
 
 	std::deque<TrailPoint> trail;
 	int last_shoot_tick;
+	bool radar_hit;
 
 	Arena* arena;
 
@@ -51,6 +52,8 @@ struct Bot {
 	void draw();
 	void draw_trail();
 	void draw_name();
+	void draw_radar();
+	virtual void on_radar_hit(glm::vec2 hit) {}
 
 	void go(float delta);
 	void turn(float delta);

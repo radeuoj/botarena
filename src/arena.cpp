@@ -2,8 +2,12 @@
 #include <iostream>
 #include <raylib.h>
 
-Arena::Arena() : is_paused(true), draw_trail(true), tick(0) {
-
+Arena::Arena() {
+	tps = 20;
+	is_paused = true;
+	draw_trail = true;
+	draw_radar = true;
+	tick = 0;
 }
 
 void Arena::init() {
@@ -17,12 +21,12 @@ void Arena::try_update_and_draw() {
 	auto now = std::chrono::steady_clock::now();
 	auto delta = std::chrono::duration<double>(now - last_update);
 
-	if (delta.count() >= 1.0 / TPS) {
+	if (delta.count() >= 1.0 / tps) {
 		last_update = now;
 		update();
-		draw(delta.count() / (1.0 / TPS) - 1.0);
+		draw(delta.count() / (1.0 / tps) - 1.0);
 	} else {
-		draw(delta.count() / (1.0 / TPS));
+		draw(delta.count() / (1.0 / tps));
 	}
 }
 
@@ -42,6 +46,7 @@ void Arena::update() {
 	handle_bullet_hits();
 	clean_bullets();
 	clean_dead_bots();
+	update_radars();
 
 	tick++;
 }
@@ -84,6 +89,35 @@ void Arena::clean_dead_bots() {
 	}), bots.end());
 }
 
+void Arena::update_radars() {
+	for (Bot* bot : bots) {
+		glm::vec2 direction = { cos(bot->rotation + bot->radar_rotation), sin(bot->rotation + bot->radar_rotation) };
+		Bot* best = nullptr;
+		float best_dist = INFINITY;
+
+		for (Bot* target : bots) {
+			if (target == bot) continue;
+			glm::vec2 ap = target->position - bot->position;
+			float dot = glm::dot(ap, direction);
+            float cross = ap.x * direction.y - ap.y * direction.x;
+
+			if (dot >= 0.0f && abs(cross) <= Bot::SIZE / 2.0f) {
+				float dist = glm::distance(bot->position, target->position);
+
+				if (dist < best_dist) {
+					best = target;
+					best_dist = dist;
+				}
+			}
+		}
+
+		bot->radar_hit = (best != nullptr);
+		if (best != nullptr) {
+			bot->on_radar_hit(best->position);
+		}
+	}
+}
+
 void Arena::draw(float alpha) {
 	if (is_paused) alpha = 1.0f;
 
@@ -98,6 +132,12 @@ void Arena::draw(float alpha) {
 	if (draw_trail) {
 		for (Bot* bot : bots) {
 			bot->draw_trail();
+		}
+	}
+
+	if (draw_radar) {
+		for (Bot* bot : bots) {
+			bot->draw_radar();
 		}
 	}
 

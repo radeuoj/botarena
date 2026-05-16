@@ -1,4 +1,5 @@
 #include "luabot.h"
+#include "arena.h"
 
 static const char* LUABOT_REGISTRY_KEY = "BOT_ARENA";
 
@@ -64,7 +65,7 @@ LuaBot::LuaBot(std::string path, Arena* arena) : Bot("Matei", arena) {
 	lua_setglobal(L, "turn");
 
 	lua_pushcfunction(L, lua_turn_gun);
-	lua_setglobal(L, "turn_gun");
+	lua_setglobal(L, "turnGun");
 
 	lua_pushcfunction(L, lua_shoot);
 	lua_setglobal(L, "shoot");
@@ -93,10 +94,43 @@ void LuaBot::init() {
 }
 
 void LuaBot::update() {
+	lua_pushnumber(L, position.x);
+	lua_setglobal(L, "positionX");
+
+	lua_pushnumber(L, position.y);
+	lua_setglobal(L, "positionY");
+
+	lua_pushnumber(L, rotation);
+	lua_setglobal(L, "rotation");
+
+	lua_pushnumber(L, gun_rotation);
+	lua_setglobal(L, "gunRotation");
+
+	lua_pushnumber(L, radar_rotation);
+	lua_setglobal(L, "radarRotation");
+
+	lua_pushnumber(L, health);
+	lua_setglobal(L, "health");
+
+	lua_pushnumber(L, arena->tick);
+	lua_setglobal(L, "tick");
+
 	lua_getglobal(L, "update");
 
 	if (lua_isfunction(L, -1)) {
 		lua_call(L, 0, 0);
+	} else {
+		lua_pop(L, 1);
+	}
+}
+
+void LuaBot::on_radar_hit(glm::vec2 hit) {
+	lua_getglobal(L, "onRadarHit");
+
+	if (lua_isfunction(L, -1)) {
+		lua_pushnumber(L, hit.x);
+		lua_pushnumber(L, hit.y);
+		lua_call(L, 2, 0);
 	} else {
 		lua_pop(L, 1);
 	}

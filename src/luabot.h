@@ -16,4 +16,5 @@ struct LuaBot : Bot {
 
 	void init();
 	void update();
+	void on_radar_hit(glm::vec2 hit);
 };

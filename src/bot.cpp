@@ -12,6 +12,7 @@ Bot::Bot(std::string name, Arena* arena) : name(name), arena(arena) {
     radar_rotation = prev_radar_rotation = screen_radar_rotation = 0;
     health = 100.0f;
     last_shoot_tick = 0;
+    radar_hit = false;
 }
 
 void Bot::before_update() {
@@ -107,6 +108,12 @@ void Bot::draw_name() {
     int y = glm::round(screen_position.y - 0.75f * SIZE);
 
     DrawText(text, x, y, font_size, WHITE);
+}
+
+void Bot::draw_radar() {
+    glm::vec2 direction = glm::vec2(cos(screen_rotation + screen_radar_rotation), sin(screen_rotation + screen_radar_rotation));
+    glm::vec2 end_position = screen_position + direction * 10000.0f;
+    DrawLine(screen_position.x, screen_position.y, end_position.x, end_position.y, radar_hit ? RED : GREEN);
 }
 
 void Bot::go(float delta) {

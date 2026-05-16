@@ -131,7 +131,9 @@ void draw_debug_window(Arena& arena) {
 
 	ImGui::Text("SALUTUTUTUTUT");
 	ImGui::Text(std::format("FPS: {:.2f}", 1.0 / GetFrameTime()).c_str());
+	ImGui::SliderInt("TPS", &arena.tps, 1, 100);
 	ImGui::Checkbox("Draw trails", &arena.draw_trail);
+	ImGui::Checkbox("Draw radar", &arena.draw_radar);
 	ImGui::Text("Tick: %d", arena.tick);
 	ImGui::Text("Bullets alive: %d", arena.bullets.size());
 
