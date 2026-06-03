@@ -5,19 +5,31 @@
 #include <iostream>
 #include "arena.h"
 
+// Declarăm variabile globale statice pentru texturi în interiorul acestui fișier
+static Texture2D body_texture;
+static Texture2D gun_texture;
+static bool textures_loaded = false;
+
 Bot::Bot(std::string name, Arena* arena) : name(name), arena(arena) {
-	position = prev_position = screen_position = { 0, 0 };
+    position = prev_position = screen_position = { 0, 0 };
     rotation = prev_rotation = screen_rotation = 0;
     gun_rotation = prev_gun_rotation = screen_gun_rotation = 0;
     radar_rotation = prev_radar_rotation = screen_radar_rotation = 0;
     health = 100.0f;
     last_shoot_tick = 0;
     radar_hit = false;
+
+    // Încărcăm texturile tale o singură dată, la crearea primului robot
+    if (!textures_loaded) {
+        body_texture = LoadTexture("src/bot_skins/robot1.png");
+        gun_texture = LoadTexture("src/bot_skins/arma1.png");
+        textures_loaded = true;
+    }
 }
 
 void Bot::before_update() {
-	prev_position = position;
-	prev_rotation = rotation;
+    prev_position = position;
+    prev_rotation = rotation;
     prev_gun_rotation = gun_rotation;
     prev_radar_rotation = radar_rotation;
 }
@@ -33,101 +45,98 @@ void Bot::before_draw(float alpha) {
     screen_radar_rotation = glm::mix(prev_radar_rotation, radar_rotation, alpha);
 }
 
-void draw_direction_triangle(glm::vec2 position, float rotation) {
-    glm::vec2 dir = { cos(rotation), sin(rotation) };
-    glm::vec2 a = position + dir * Bot::SIZE / 2.0f;
-
-    rotation += 2.0f * PI / 3.0f;
-    dir = { cos(rotation), sin(rotation) };
-    glm::vec2 b = position + dir * Bot::SIZE / 10.0f;
-
-    rotation += 2.0f * PI / 3.0f;
-    dir = { cos(rotation), sin(rotation) };
-    glm::vec2 c = position + dir * Bot::SIZE / 10.0f;
-
-    DrawTriangle(
-        raylib_vec_from_glm_vec(c),
-        raylib_vec_from_glm_vec(b),
-        raylib_vec_from_glm_vec(a),
-        YELLOW
-    );
-}
-
-void draw_gun_triangle(glm::vec2 position, float rotation) {
-    glm::vec2 dir = { cos(rotation), sin(rotation) };
-    glm::vec2 a = position + dir * Bot::SIZE / 10.0f;
-
-    rotation += 2.0f * PI / 3.0f;
-    dir = { cos(rotation), sin(rotation) };
-    glm::vec2 b = position + dir * Bot::SIZE / 10.0f;
-
-    rotation += 2.0f * PI / 3.0f;
-    dir = { cos(rotation), sin(rotation) };
-    glm::vec2 c = position + dir * Bot::SIZE / 10.0f;
-
-    DrawTriangle(
-        raylib_vec_from_glm_vec(c),
-        raylib_vec_from_glm_vec(b),
-        raylib_vec_from_glm_vec(a),
-        BLUE
-    );
-}
-
 void Bot::draw() {
-    DrawCircle(screen_position.x, screen_position.y, SIZE / 2, RED);
-    draw_direction_triangle(screen_position, screen_rotation);
-    draw_gun_triangle(
-        screen_position + glm::vec2(cos(screen_rotation + screen_gun_rotation), sin(screen_rotation + screen_gun_rotation)) * SIZE / 2.0f,
-        screen_rotation + screen_gun_rotation
-    );
-}
+    if (body_texture.id > 0 && gun_texture.id > 0) {
 
-void Bot::draw_trail() {
-    trail.push_front({ screen_position, screen_rotation });
-    if (trail.size() > MAX_TRAIL_SIZE) {
-        trail.pop_back();
+        // 1. DESENARE CORP ROBOT (Rămâne neschimbat, centrat perfect)
+        Rectangle sourceRecBody = { 0.0f, 0.0f, (float)body_texture.width, (float)body_texture.height };
+        Rectangle destRecBody = { screen_position.x, screen_position.y, SIZE, SIZE };
+        Vector2 originBody = { SIZE / 2.0f, SIZE / 2.0f };
+
+        DrawTexturePro(body_texture, sourceRecBody, destRecBody, originBody, glm::degrees(screen_rotation), WHITE);
+
+        // 2. DESENARE ARMA (Pentru textură de 64x64 unde arma începe de la jumătate)
+        Rectangle sourceRecGun = { 0.0f, 0.0f, (float)gun_texture.width, (float)gun_texture.height };
+
+        // Desenăm arma exact pe poziția robotului, la dimensiunea ei nativă (SIZE x SIZE)
+        Rectangle destRecGun = { screen_position.x, screen_position.y, SIZE, SIZE };
+
+        // --- CALIBRARE FINĂ AICI ---
+        // SIZE / 2.0f (adică 32) înseamnă centrul imaginii. 
+        // Deoarece desenul tău începe de la jumătate, dacă setăm valoarea pe X mai mică, 
+        // imaginea va fi "împinsă" în față.
+        // Încearcă valori între 0.0f și 16.0f (de exemplu, SIZE / 4.0f înseamnă 16 pixeli) 
+        // până când se aliniază perfect cu marginea robotului.
+        float punctAncoraX = 0.0f;
+
+        Vector2 originGun = { punctAncoraX, SIZE / 2.0f };
+
+        float total_gun_angle = glm::degrees(screen_rotation + screen_gun_rotation);
+        DrawTexturePro(gun_texture, sourceRecGun, destRecGun, originGun, total_gun_angle, WHITE);
+
     }
-
-    for (size_t i = 0; i < trail.size(); i++) {
-        // Calculăm transparența: punctele mai vechi sunt mai transparente
-        // i = 0 e cel mai nou, i = trail.size()-1 e cel mai vechi
-        float trailAlpha = 1.0f - ((float)i / trail.size());
-
-        // Culoarea robotului (de ex RED) cu transparență variabilă
-        Color culoare = GetColor(0x2C3E50FF);
-        Color color = Fade(culoare, trailAlpha * 0.2f); // 0.5f pentru a fi mai discret
-
-        DrawCircle(trail[i].pos.x, trail[i].pos.y, SIZE / 2, color);
+    else {
+        // Fallback în caz că nu se găsesc pozele
+        DrawRectanglePro({ screen_position.x, screen_position.y, SIZE, SIZE }, { SIZE / 2, SIZE / 2 }, glm::degrees(screen_rotation), BLUE);
+        float gun_w = 40.0f; float gun_h = 10.0f;
+        DrawRectanglePro({ screen_position.x, screen_position.y, gun_w, gun_h }, { 0, gun_h / 2 }, glm::degrees(screen_rotation + screen_gun_rotation), BLACK);
     }
-}
-
-void Bot::draw_name() {
-    const char* text = name.c_str();
-    int font_size = 20;
-    int x = glm::round(screen_position.x - MeasureText(text, font_size) / 2.0f);
-    int y = glm::round(screen_position.y - 0.75f * SIZE);
-
-    DrawText(text, x, y, font_size, WHITE);
 }
 
 void Bot::draw_radar() {
-    glm::vec2 direction = glm::vec2(cos(screen_rotation + screen_radar_rotation), sin(screen_rotation + screen_radar_rotation));
-    glm::vec2 end_position = screen_position + direction * 10000.0f;
-    DrawLine(screen_position.x, screen_position.y, end_position.x, end_position.y, radar_hit ? RED : GREEN);
+    float radar_dist = 2000.0f;
+    float total_radar_rotation = screen_rotation + screen_radar_rotation;
+    glm::vec2 radar_dir(glm::cos(total_radar_rotation), glm::sin(total_radar_rotation));
+
+    Color color = GREEN;
+    if (radar_hit) {
+        color = RED;
+    }
+    color.a = 50;
+
+    DrawLineEx(
+        raylib_vec_from_glm_vec(screen_position),
+        raylib_vec_from_glm_vec(screen_position + radar_dir * radar_dist),
+        3.0f,
+        color
+    );
+}
+
+void Bot::draw_name() {
+    DrawText(name.c_str(), screen_position.x - SIZE / 2, screen_position.y - SIZE / 2 - 20, 16, WHITE);
+
+    DrawRectangle(screen_position.x - SIZE / 2, screen_position.y - SIZE / 2 - 5, SIZE, 4, RED);
+    DrawRectangle(screen_position.x - SIZE / 2, screen_position.y - SIZE / 2 - 5, SIZE * (health / 100.0f), 4, GREEN);
+}
+
+void Bot::draw_trail() {
+    for (size_t i = 0; i < trail.size(); i++) {
+        Color color = BLUE;
+        color.a = (float)i / trail.size() * 50;
+        DrawRectanglePro(
+            { trail[i].pos.x, trail[i].pos.y, SIZE, SIZE },
+            { SIZE / 2, SIZE / 2 },
+            glm::degrees(trail[i].rotation),
+            color
+        );
+    }
 }
 
 void Bot::go(float delta) {
-    delta = glm::clamp(delta, -10.0f, 10.0f);
+    delta = glm::clamp(delta, -8.0f, 8.0f);
 
-    // Logica ta existentă de mișcare și coliziune cu pereții
+    if (arena->tick % 2 == 0) {
+        trail.push_back({ position, rotation });
+        if (trail.size() > MAX_TRAIL_SIZE) {
+            trail.pop_front();
+        }
+    }
+
     glm::vec2 direction(glm::cos(rotation), glm::sin(rotation));
     position += direction * delta;
 
-    // Calculăm limitele ținând cont de centrul robotului
     float halfSize = SIZE / 2.0f;
 
-    // Constrângem poziția X între margini
-    // GetScreenWidth() returnează 900 (valoarea setată în main)
     if (position.x < halfSize) {
         position.x = halfSize;
     }
@@ -135,8 +144,6 @@ void Bot::go(float delta) {
         position.x = GetScreenWidth() - halfSize;
     }
 
-    // Constrângem poziția Y între margini
-    // GetScreenHeight() returnează 600
     if (position.y < halfSize) {
         position.y = halfSize;
     }
@@ -147,7 +154,7 @@ void Bot::go(float delta) {
 
 void Bot::turn(float delta) {
     delta = glm::clamp(delta, -PI / 20, PI / 20);
-	rotation += delta;
+    rotation += delta;
 }
 
 void Bot::turn_gun(float delta) {
@@ -156,21 +163,15 @@ void Bot::turn_gun(float delta) {
 }
 
 void Bot::turn_radar(float delta) {
-    delta = glm::clamp(delta, -PI / 6, PI / 6);
+    delta = glm::clamp(delta, -PI / 4, PI / 4);
     radar_rotation += delta;
 }
 
 void Bot::shoot() {
-    if (arena->tick - last_shoot_tick < SHOOT_DELTA_TICKS) {
-        return;
+    if (arena->tick - last_shoot_tick >= SHOOT_DELTA_TICKS) {
+        last_shoot_tick = arena->tick;
+        float total_gun_rotation = rotation + gun_rotation;
+        glm::vec2 direction(glm::cos(total_gun_rotation), glm::sin(total_gun_rotation));
+        arena->bullets.push_back(Bullet(position, direction, this));
     }
-
-    last_shoot_tick = arena->tick;
-    glm::vec2 direction = glm::vec2(cos(rotation + gun_rotation), sin(rotation + gun_rotation));
-
-    arena->bullets.emplace_back(
-        position + direction * SIZE / 2.0f,
-        direction,
-        this
-    );
 }

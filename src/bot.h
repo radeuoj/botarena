@@ -1,5 +1,6 @@
 #pragma once
 
+#include <raylib.h>
 #include <glm/glm.hpp>
 #include <string>
 #include <deque>
@@ -15,7 +16,7 @@ struct TrailPoint {
 struct Arena;
 
 struct Bot {
-	static constexpr float SIZE = 100.0f;
+	static constexpr float SIZE = 64.0f;
 	static constexpr size_t MAX_TRAIL_SIZE = 50;
 	static constexpr int SHOOT_DELTA_TICKS = 20;
 
@@ -36,6 +37,9 @@ struct Bot {
 	float screen_rotation;
 	float screen_gun_rotation;
 	float screen_radar_rotation;
+
+	Texture2D body_texture;
+	Texture2D gun_texture;
 
 	std::deque<TrailPoint> trail;
 	int last_shoot_tick;

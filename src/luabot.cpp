@@ -1,5 +1,6 @@
 #include "luabot.h"
 #include "arena.h"
+#include <iostream>
 
 static const char* LUABOT_REGISTRY_KEY = "BOT_ARENA";
 
@@ -102,8 +103,13 @@ void LuaBot::init() {
 	lua_getglobal(L, "init");
 
 	if (lua_isfunction(L, -1)) {
-		lua_call(L, 0, 0);
-	} else {
+		// Înlocuim lua_call(L, 0, 0); cu lua_pcall:
+		if (lua_pcall(L, 0, 0, 0) != LUA_OK) {
+			std::cerr << "Eroare Lua in init() pentru " << name << ": " << lua_tostring(L, -1) << std::endl;
+			lua_pop(L, 1); // scoatem eroarea de pe stivă
+		}
+	}
+	else {
 		lua_pop(L, 1);
 	}
 }
@@ -124,17 +130,18 @@ void LuaBot::update() {
 	lua_pushnumber(L, radar_rotation);
 	lua_setglobal(L, "radarRotation");
 
-	lua_pushnumber(L, health);
-	lua_setglobal(L, "health");
-
 	lua_pushnumber(L, arena->tick);
 	lua_setglobal(L, "tick");
 
 	lua_getglobal(L, "update");
-
 	if (lua_isfunction(L, -1)) {
-		lua_call(L, 0, 0);
-	} else {
+		// Înlocuim lua_call(L, 0, 0); cu pcall protejat:
+		if (lua_pcall(L, 0, 0, 0) != LUA_OK) {
+			std::cerr << "Eroare Lua in update() pentru " << name << ": " << lua_tostring(L, -1) << std::endl;
+			lua_pop(L, 1); // scoatem eroarea ca să nu umplem stiva
+		}
+	}
+	else {
 		lua_pop(L, 1);
 	}
 }
