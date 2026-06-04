@@ -5,7 +5,7 @@
 Arena::Arena() {
 	tps = 20;
 	is_paused = true;
-	draw_trail = true;
+	draw_trail = false;
 	draw_radar = true;
 	tick = 0;
 }

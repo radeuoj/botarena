@@ -5,11 +5,6 @@
 #include <iostream>
 #include "arena.h"
 
-// Declarăm variabile globale statice pentru texturi în interiorul acestui fișier
-static Texture2D body_texture;
-static Texture2D gun_texture;
-static bool textures_loaded = false;
-
 Bot::Bot(std::string name, Arena* arena) : name(name), arena(arena) {
     position = prev_position = screen_position = { 0, 0 };
     rotation = prev_rotation = screen_rotation = 0;
@@ -19,12 +14,8 @@ Bot::Bot(std::string name, Arena* arena) : name(name), arena(arena) {
     last_shoot_tick = 0;
     radar_hit = false;
 
-    // Încărcăm texturile tale o singură dată, la crearea primului robot
-    if (!textures_loaded) {
-        body_texture = LoadTexture("src/bot_skins/robot1.png");
-        gun_texture = LoadTexture("src/bot_skins/arma1.png");
-        textures_loaded = true;
-    }
+    body_texture = LoadTexture("skins/robot1.png");
+    gun_texture = LoadTexture("skins/arma1.png");
 }
 
 void Bot::before_update() {
@@ -103,10 +94,15 @@ void Bot::draw_radar() {
 }
 
 void Bot::draw_name() {
-    DrawText(name.c_str(), screen_position.x - SIZE / 2, screen_position.y - SIZE / 2 - 20, 16, WHITE);
+    const char* text = name.c_str();
+    int font_size = 20;
+    int x = glm::round(screen_position.x - MeasureText(text, font_size) / 2.0f);
+    int y = glm::round(screen_position.y - 1.0f * SIZE);
 
-    DrawRectangle(screen_position.x - SIZE / 2, screen_position.y - SIZE / 2 - 5, SIZE, 4, RED);
-    DrawRectangle(screen_position.x - SIZE / 2, screen_position.y - SIZE / 2 - 5, SIZE * (health / 100.0f), 4, GREEN);
+    DrawText(text, x, y, font_size, WHITE);
+
+    DrawRectangle(screen_position.x - SIZE / 2, screen_position.y - SIZE / 2 - 10.0f, SIZE, 4, RED);
+    DrawRectangle(screen_position.x - SIZE / 2, screen_position.y - SIZE / 2 - 10.0f, SIZE * (health / 100.0f), 4, GREEN);
 }
 
 void Bot::draw_trail() {
