@@ -8,6 +8,7 @@ Arena::Arena() {
 	draw_trail = false;
 	draw_radar = true;
 	tick = 0;
+	background_texture = LoadTexture("background.png");
 }
 
 void Arena::init() {
@@ -121,6 +122,8 @@ void Arena::update_radars() {
 void Arena::draw(float alpha) {
 	if (is_paused) alpha = 1.0f;
 
+	draw_background();
+
 	for (Bot* bot : bots) {
 		bot->before_draw(alpha);
 	}
@@ -152,6 +155,13 @@ void Arena::draw(float alpha) {
 	for (Bot* bot : bots) {
 		bot->draw_name();
 	}
+}
+
+void Arena::draw_background() {
+	Rectangle src = { 0, 0, WIDTH, HEIGHT };
+	Rectangle dest = { 0, 0, WIDTH, HEIGHT };
+
+	DrawTexturePro(background_texture, src, dest, { 0, 0 }, 0, WHITE);
 }
 
 glm::vec2 get_random_position() {

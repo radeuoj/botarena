@@ -19,6 +19,7 @@ struct Arena {
 	bool draw_trail;
 	bool draw_radar;
 	int tick;
+	Texture2D background_texture;
 
 	Arena();
 
@@ -26,6 +27,7 @@ struct Arena {
 	void try_update_and_draw();
 	void update();
 	void draw(float alpha);
+	void draw_background();
 	void add_lua_bot(const std::string& path);
 	void clean_bullets();
 	void handle_bullet_hits();
